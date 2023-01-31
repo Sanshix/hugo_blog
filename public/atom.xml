@@ -4,7 +4,7 @@
 <feed xmlns="http://www.w3.org/2005/Atom" xml:lang="zh-CN">
     <title type="text">三石兄博客</title>
     <subtitle type="html">三石兄博客，记录个人的生活与工作。</subtitle>
-    <updated>2023-01-31T18:38:41&#43;08:00</updated>
+    <updated>2023-01-31T19:38:23&#43;08:00</updated>
     <id>https://huangl.top/</id>
     <link rel="alternate" type="text/html" href="https://huangl.top/" />
     <link rel="self" type="application/atom&#43;xml" href="https://huangl.top/atom.xml" />
@@ -16,4 +16,38 @@
             </author>
     <rights>[CC BY-NC-SA 4.0](https://creativecommons.org/licenses/by-nc-sa/4.0/deed.zh)</rights>
     <generator uri="https://gohugo.io/" version="0.107.0">Hugo</generator>
+        <entry>
+            <title type="text">博客的更新迭代</title>
+            <link rel="alternate" type="text/html" href="https://huangl.top/posts/first/" />
+            <id>https://huangl.top/posts/first/</id>
+            <updated>2023-01-31T19:38:16&#43;08:00</updated>
+            <published>2023-01-31T15:31:24&#43;08:00</published>
+            
+            <summary type="html">2017年自己使用TP5开发了一套博客程序，一直运行至..2023..年，由于框架迭……</summary>
+            
+                <content type="html">&lt;p&gt;&lt;b&gt;2017&lt;/b&gt;年自己使用&lt;b&gt;TP5&lt;/b&gt;开发了一套博客程序，一直运行至..2023..年，由于框架迭代问题以及本人懒惰一直没维护升级导致有很多漏洞，经常被攻击，于是在&lt;b&gt;2023&lt;/b&gt;年正式废弃，启用新的基于&lt;b&gt;Hugo&lt;/b&gt;二开的博客程序，历史文章会选择性的迁移部分到新系统中。&lt;/p&gt;
+&lt;hr&gt;
+&lt;p&gt;一直想要再重新手撸一套博客程序，但是由于各种各样的事情最终还是没有实施，最后选择偷懒用现成的Hugo😄&lt;/p&gt;
+</content>
+            
+            
+            
+            
+            
+                
+                    
+                        
+                            
+                            
+                            
+                                <category scheme="https://huangl.top/categories/%E7%94%9F%E6%B4%BB/" term="生活" label="生活" />
+                            
+                        
+                    
+                
+                    
+                
+            
+        </entry>
+    
 </feed>

@@ -1,7 +1,7 @@
 ---
 title: "博客的更新迭代"
 date: 2023-01-31T15:31:24+08:00
-draft: true
+draft: false
 categories: 
         - 生活 
 ---
