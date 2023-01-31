@@ -25,7 +25,7 @@ pluralizeListTitles = false
 summaryLength = 42
 
 # 是否开启 GitHub 风格的 Emoji 书写方式
-enableEmoji = false
+enableEmoji = true
 
 # 脚注的返回链接中的文本
 footnoteReturnLinkContents = "↩"
@@ -102,7 +102,7 @@ uglyURLs = false
     # 座右铭或简介
     motto = "刻意练习，日益精进"
     # 头像
-    avatar = "/icons/apple-touch-icon.png"
+    avatar = ""
     # 网站（默认值：baseURL）
     website = ""
     # 推特
@@ -214,21 +214,24 @@ uglyURLs = false
         pre = "internal"
         post = "tags"
     [[menu.main]]
+        pageref = "/link/"
+        name = "友链"
+        weight = 5
+        pre = "link"
+        post = "link"
+    [[menu.main]]
         pageref = "/about/"
         name = "关于"
-        weight = 5
+        weight = 6
         pre = "internal"
         post = "user-circle"
     [[menu.main]]
-        weight = 6
+        weight = 7
         identifier = "theme-switcher"
     [[menu.main]]
-        weight = 7
-        identifier = "lang-switcher"
-    # [[menu.main]]
-    #     weight = 8
-    #     identifier = "search"
-    #     post = "search"
+        weight = 8
+        identifier = "search"
+        post = "search"
 
 
 
@@ -243,7 +246,7 @@ uglyURLs = false
     enableHeader = true
 
     # 是否自动隐藏
-    enableHeaderAutoHide = false
+    enableHeaderAutoHide = true
     # 说明：仅对弹性布局的顶栏有效
 
     # 是否在首页显示
@@ -746,7 +749,7 @@ uglyURLs = false
     #      单位：em
 
     # 文章是否为原创（全局设置）
-    original = true
+    original = false
     # 说明：会影响文章的作者信息和版权信息
     #      文章的 Front Matter 中的 `original`
     #      的优先级高于此处
@@ -782,12 +785,12 @@ uglyURLs = false
     publishedDateIcon = "calendar-alt"
 
     # 是否显示修改时间
-    displayModifiedDate = true
+    displayModifiedDate = false
     # 修改时间的图标
     modifiedDateIcon = "calendar-check"
 
     # 是否显示过期时间
-    displayExpiredDate = true
+    displayExpiredDate = false
     # 过期时间的图标
     expiredDateIcon = "calendar-times"
 
@@ -809,7 +812,7 @@ uglyURLs = false
     readingTimeIcon = "clock"
 
     # 是否显示不蒜子页面浏览量
-    displayBusuanziPagePV = false
+    displayBusuanziPagePV = true
     # 不蒜子页面浏览量的图标
     busuanziPagePVIcon = "eye"
     # 说明：仅在生产环境（production）下渲染
@@ -1008,12 +1011,12 @@ uglyURLs = false
     enableParagraphIndent = true
 
     # 是否缩进第一段（全局设置）
-    indentFirstParagraph = false
+    indentFirstParagraph = true
     # 说明：文章的 Front Matter 中的 `indentFirstParagraph`
     #      的优先级高于此处
 
     # 分段样式（全局设置）
-    paragraphStyle = "margin"
+    paragraphStyle = "indent"
     # 说明：段间距式（margin）或段首缩排（indent）
     #      文章的 Front Matter 中的 `indent`
     #      的优先级高于此处
@@ -1085,7 +1088,7 @@ uglyURLs = false
     # 文章更新徽章
 
     # 是否开启
-    enablePostUpdatedBadge = true
+    enablePostUpdatedBadge = false
 
     # 是否显示（全局设置）
     displayUpdatedBadge = true
@@ -1143,7 +1146,7 @@ uglyURLs = false
     # 文章分享
 
     # 是否开启
-    enablePostShare = true
+    enablePostShare = false
 
     # 是否显示（全局设置）
     displayPostShare = true
@@ -1236,7 +1239,7 @@ uglyURLs = false
     displayBackToTopInHome = true
 
     # 是否在移动端显示
-    displayBackToTopOnMobile = false
+    displayBackToTopOnMobile = true
 
     # 按钮图标
     backToTopIcon = "arrow-up"
@@ -1256,7 +1259,7 @@ uglyURLs = false
 
     displayCopyleftSymbol = false
     # 是否显示版权符号（©）
-    displayCopyrightSymbol = true
+    displayCopyrightSymbol = false
 
     # 是否显示站点的创建年份
     displaySiteCreatedYear = true
@@ -1275,9 +1278,9 @@ uglyURLs = false
     displaySiteCopyright = false
 
     # 自定义页脚（支持 Markdown）
-    customFooter = ""
+    customFooter = "[蜀ICP备17023832号](https://beian.miit.gov.cn)"
 
-    displayBusuanziSiteUVAndPV = false
+    displayBusuanziSiteUVAndPV = true
     busuanziSiteUVText = "本站访客数"
     busuanziSiteUVIcon = "user"
     busuanziSitePVText = "本站访问量"

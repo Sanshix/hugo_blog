@@ -9,8 +9,8 @@
     <channel>
         <title>三石兄博客</title>
         <link>https://huangl.top/</link>
-        <description>MemE 是一个强大且可高度定制的 GoHugo 博客主题，专为个人博客设计。</description>
-        <generator>Hugo 0.110.0 https://gohugo.io/</generator>
+        <description>三石兄博客，记录个人的生活与工作。</description>
+        <generator>Hugo 0.107.0 https://gohugo.io/</generator>
         
             <language>zh-CN</language>
         
@@ -23,7 +23,7 @@
         
             <copyright>[CC BY-NC-SA 4.0](https://creativecommons.org/licenses/by-nc-sa/4.0/deed.zh)</copyright>
         
-        <lastBuildDate>Tue, 31 Jan 2023 14:06:26 &#43;0800</lastBuildDate>
+        <lastBuildDate>Tue, 31 Jan 2023 18:38:41 &#43;0800</lastBuildDate>
         
             <atom:link rel="self" type="application/rss&#43;xml" href="https://huangl.top/rss.xml" />
         
