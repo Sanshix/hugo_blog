@@ -214,22 +214,16 @@ uglyURLs = false
         pre = "internal"
         post = "tags"
     [[menu.main]]
-        pageref = "/link/"
-        name = "友链"
-        weight = 5
-        pre = "link"
-        post = "link"
-    [[menu.main]]
         pageref = "/about/"
         name = "关于"
-        weight = 6
+        weight = 5
         pre = "internal"
         post = "user-circle"
     [[menu.main]]
-        weight = 7
+        weight = 6
         identifier = "theme-switcher"
     [[menu.main]]
-        weight = 8
+        weight = 7
         identifier = "search"
         post = "search"
 
@@ -1272,7 +1266,7 @@ uglyURLs = false
     iconAnimation = true
 
     # 是否显示 Hugo 和 MemE 的链接
-    displayPoweredBy = true
+    displayPoweredBy = false
 
     # 是否显示站点的版权信息
     displaySiteCopyright = false
