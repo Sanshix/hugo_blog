@@ -40,7 +40,7 @@
 
             {{- if and .Site.Params.displayBusuanziSiteUVAndPV (eq hugo.Environment "production") }}
                 <div class="busuanzi-site-uv-and-pv">
-                    <span id="busuanzi_container_site_uv">
+<!--                     <span id="busuanzi_container_site_uv">
                         {{- with .Site.Params.busuanziSiteUVText -}}
                             {{- . -}}
                             &nbsp;
@@ -51,9 +51,10 @@
                             &nbsp;
                         {{- end -}}
 
-                        <!-- Avoid extra spaces -->
+                    
                         {{- print `<span id="busuanzi_value_site_uv"></span>` | safeHTML -}}
-                    </span>
+                    </span> 
+-->
 
                     {{- print "&nbsp;|&nbsp;" | safeHTML -}}
 
