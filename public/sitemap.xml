@@ -3,19 +3,34 @@
   xmlns:xhtml="http://www.w3.org/1999/xhtml">
   <url>
     <loc>https://huangl.top/categories/</loc>
-    <lastmod>2023-02-21T20:45:23+08:00</lastmod>
+    <lastmod>2023-02-22T20:51:13+08:00</lastmod>
+  </url><url>
+    <loc>https://huangl.top/tags/go/</loc>
+    <lastmod>2023-02-22T20:51:13+08:00</lastmod>
+  </url><url>
+    <loc>https://huangl.top/tags/leetcode/</loc>
+    <lastmod>2023-02-22T20:51:13+08:00</lastmod>
   </url><url>
     <loc>https://huangl.top/posts/</loc>
-    <lastmod>2023-02-21T20:45:23+08:00</lastmod>
+    <lastmod>2023-02-22T20:51:13+08:00</lastmod>
+  </url><url>
+    <loc>https://huangl.top/tags/</loc>
+    <lastmod>2023-02-22T20:51:13+08:00</lastmod>
+  </url><url>
+    <loc>https://huangl.top/posts/23022220/</loc>
+    <lastmod>2023-02-22T20:51:13+08:00</lastmod>
   </url><url>
     <loc>https://huangl.top/</loc>
-    <lastmod>2023-02-21T20:45:23+08:00</lastmod>
+    <lastmod>2023-02-22T20:51:13+08:00</lastmod>
+  </url><url>
+    <loc>https://huangl.top/tags/%E6%95%B0%E7%BB%84/</loc>
+    <lastmod>2023-02-22T20:51:13+08:00</lastmod>
   </url><url>
     <loc>https://huangl.top/categories/%E7%AE%97%E6%B3%95/</loc>
-    <lastmod>2023-02-21T20:45:23+08:00</lastmod>
+    <lastmod>2023-02-22T20:51:13+08:00</lastmod>
   </url><url>
     <loc>https://huangl.top/posts/23022120/</loc>
-    <lastmod>2023-02-21T20:45:23+08:00</lastmod>
+    <lastmod>2023-02-22T20:51:13+08:00</lastmod>
   </url><url>
     <loc>https://huangl.top/posts/first/</loc>
     <lastmod>2023-01-31T19:39:38+08:00</lastmod>
@@ -25,7 +40,5 @@
   </url><url>
     <loc>https://huangl.top/about/</loc>
     <lastmod>2023-02-21T20:33:33+08:00</lastmod>
-  </url><url>
-    <loc>https://huangl.top/tags/</loc>
   </url>
 </urlset>
