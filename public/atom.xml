@@ -4,7 +4,7 @@
 <feed xmlns="http://www.w3.org/2005/Atom" xml:lang="zh-CN">
     <title type="text">三石兄博客</title>
     <subtitle type="html">三石兄博客，记录个人的生活与工作。</subtitle>
-    <updated>2023-03-08T20:42:51&#43;08:00</updated>
+    <updated>2024-08-01T19:10:35&#43;08:00</updated>
     <id>https://huangl.top/</id>
     <link rel="alternate" type="text/html" href="https://huangl.top/" />
     <link rel="self" type="application/atom&#43;xml" href="https://huangl.top/atom.xml" />
@@ -15,12 +15,104 @@
                 <email>sanshix@qq.com</email>
             </author>
     <rights>[CC BY-NC-SA 4.0](https://creativecommons.org/licenses/by-nc-sa/4.0/deed.zh)</rights>
-    <generator uri="https://gohugo.io/" version="0.110.0">Hugo</generator>
+    <generator uri="https://gohugo.io/" version="0.121.1">Hugo</generator>
+        <entry>
+            <title type="text">Alpine docker容器中执行Go程序报Not Found</title>
+            <link rel="alternate" type="text/html" href="https://huangl.top/posts/23030920/" />
+            <id>https://huangl.top/posts/23030920/</id>
+            <updated>2023-03-09T20:33:50&#43;08:00</updated>
+            <published>2023-03-09T00:00:00&#43;00:00</published>
+            
+            <summary type="html">问题描述： 在docker中运行go程序报错：not found /app # ls service-inv /app # ./service-inv /bin/sh: ./service-inv: not found 检查原因：……</summary>
+            
+                <content type="html">&lt;h1 id=&#34;问题描述&#34;&gt;问题描述：&lt;/h1&gt;
+&lt;p&gt;在docker中运行go程序报错：not found&lt;/p&gt;
+&lt;pre tabindex=&#34;0&#34;&gt;&lt;code&gt;/app # ls
+service-inv
+/app # ./service-inv 
+/bin/sh: ./service-inv: not found
+&lt;/code&gt;&lt;/pre&gt;&lt;h1 id=&#34;检查原因&#34;&gt;检查原因：&lt;/h1&gt;
+&lt;p&gt;程序运行的时候找不到动态链接的目标文件&lt;/p&gt;
+&lt;pre tabindex=&#34;0&#34;&gt;&lt;code&gt;/app # ls
+service-inv
+/app # ldd service-inv
+/lib64/ld-linux-x86-64.so.2 (0x7fa611092000)
+Error loading shared library libresolv.so.2: No such file or directory (needed by service-inv)
+libpthread.so.0 =&amp;gt; /lib64/ld-linux-x86-64.so.2 (0x7fa611092000)
+libc.so.6 =&amp;gt; /lib64/ld-linux-x86-64.so.2 (0x7fa611092000)
+Error relocating service-inv: __res_search: symbol not found
+&lt;/code&gt;&lt;/pre&gt;&lt;h1 id=&#34;动态连接&#34;&gt;动态连接：&lt;/h1&gt;
+&lt;p&gt;我们都知道，程序编写完毕后需要编译、链接才能运行。链接是把目标文件、操作系统的启动代码和用到的库文件进行组织，最终形成可执行代码的过程。按理来讲，我们的代码变成可执行的程序的时候，需要调用的代码都已经被链接好了，但是这并不完全准确，因为在此时完成的只是静态链接。
+所谓静态链接是指把要调用的函数或者过程链接到可执行文件中，成为可执行文件的一部分。静态链接的问题很明显，它会造成空间的浪费和软件更新的困难。举例来说，当有好几个程序调用了相同的系统函数时，每个程序都把这个函数加载到内存里，重复占用了很多空间，造成了资源的浪费。
+动态链接解决了这一问题，其基本思想是把程序按照模块拆分成各个相对独立部分，在程序运行时才将它们链接在一起形成一个完整的程序，而不是像静态链接一样把所有程序模块都链接成一个单独的可执行文件。&lt;/p&gt;
+&lt;h1 id=&#34;问题描述-1&#34;&gt;问题描述：&lt;/h1&gt;
+&lt;p&gt;The GNU C Library(glibc) 是当代绝大多数 Linux 发行版内置的 C 标准库实现，而 musl libc 则是一个速度快、轻量化的，严格遵循 POSIX 定义的 C 标准库实现。虽然后者试图保持与 glibc 的兼容性，但两者间的差距始终不小，在使用时依旧会有兼容性问题。
+Alpine 为了简单轻量，没有使用大多数 Linux 发行版使用的 glibc 而选择了 musl libc。因为程序是在Linux系统上编译的，基于 glibc，而 Docker 容器选择了 Alpine 镜像，使用的是 musl libc，所以无法正常动态链接，也就无法运行。&lt;/p&gt;
+&lt;h1 id=&#34;解决方案&#34;&gt;解决方案：&lt;/h1&gt;
+&lt;ol&gt;
+&lt;li&gt;docker镜像不用Alpine，选择和编译环境一致的发行版；或者在Alpine环境下编译运行&lt;/li&gt;
+&lt;li&gt;编译时指定参数采用静态链接编译&lt;/li&gt;
+&lt;/ol&gt;
+&lt;pre tabindex=&#34;0&#34;&gt;&lt;code&gt;# 通过-tags netgo指定静态链接
+go build -tags netgo -o main .
+&lt;/code&gt;&lt;/pre&gt;&lt;ol start=&#34;3&#34;&gt;
+&lt;li&gt;编译时指定环境变量禁用CGO&lt;/li&gt;
+&lt;/ol&gt;
+&lt;pre tabindex=&#34;0&#34;&gt;&lt;code&gt;# 禁用CGO
+ENV CGO_ENABLED=0
+go build -o main .
+&lt;/code&gt;&lt;/pre&gt;&lt;ol start=&#34;4&#34;&gt;
+&lt;li&gt;在Dockerfile构建配置中加入lib64的软连接&lt;/li&gt;
+&lt;/ol&gt;
+&lt;pre tabindex=&#34;0&#34;&gt;&lt;code&gt;# 在Dockerfile编写加入lib64的软连接的操作
+RUN mkdir /lib64 &amp;amp;&amp;amp; ln -s /lib/libc.musl-x86_64.so.1 /lib64/ld-linux-x86-64.so.2
+&lt;/code&gt;&lt;/pre&gt;&lt;ol start=&#34;5&#34;&gt;
+&lt;li&gt;在Dockerfile构建配置中加入安装glibc的操作&lt;/li&gt;
+&lt;/ol&gt;
+&lt;pre tabindex=&#34;0&#34;&gt;&lt;code&gt;# 在Dockerfile编写安装glibc的操作
+ENV GLIBC_REPO=https://github.com/sgerrand/alpine-pkg-glibc
+ENV GLIBC_VERSION=2.30-r0
+
+RUN set -ex &amp;amp;&amp;amp; \
+    apk --update add libstdc++ curl ca-certificates &amp;amp;&amp;amp; \
+    for pkg in glibc-${GLIBC_VERSION} glibc-bin-${GLIBC_VERSION}; \
+        do curl -sSL ${GLIBC_REPO}/releases/download/${GLIBC_VERSION}/${pkg}.apk -o /tmp/${pkg}.apk; done &amp;amp;&amp;amp; \
+    apk add --allow-untrusted /tmp/*.apk &amp;amp;&amp;amp; \
+    rm -v /tmp/*.apk &amp;amp;&amp;amp; \
+    /usr/glibc-compat/sbin/ldconfig /lib /usr/glibc-compat/lib
+&lt;/code&gt;&lt;/pre&gt;&lt;h3 id=&#34;亲测选择其中任意一种解决方案可以解决当前程序无法执行的问题&#34;&gt;亲测选择其中任意一种解决方案可以解决当前程序无法执行的问题&lt;/h3&gt;
+&lt;br&gt;
+&lt;p&gt;参考文献:&lt;/p&gt;
+&lt;p&gt;● &lt;a href=&#34;https://naiv.fun/Ops/binary-not-found-in-Alpine.html&#34;&gt;https://naiv.fun/Ops/binary-not-found-in-Alpine.html&lt;/a&gt;&lt;/p&gt;
+&lt;p&gt;● &lt;a href=&#34;http://www.codebaoku.com/it-go/it-go-202638.html&#34;&gt;http://www.codebaoku.com/it-go/it-go-202638.html&lt;/a&gt;&lt;/p&gt;
+&lt;p&gt;● &lt;a href=&#34;https://www.cnblogs.com/yangzp/p/14609641.html&#34;&gt;https://www.cnblogs.com/yangzp/p/14609641.html&lt;/a&gt;&lt;/p&gt;
+</content>
+            
+            
+            
+            
+            
+                
+                    
+                        
+                            
+                            
+                            
+                                <category scheme="https://huangl.top/categories/%E8%BF%90%E7%BB%B4/" term="运维" label="运维" />
+                            
+                        
+                    
+                
+                    
+                
+            
+        </entry>
+    
         <entry>
             <title type="text">部署GitLab-Runner实现CI/CD</title>
             <link rel="alternate" type="text/html" href="https://huangl.top/posts/23030820/" />
             <id>https://huangl.top/posts/23030820/</id>
-            <updated>2023-03-08T20:42:49&#43;08:00</updated>
+            <updated>2023-03-09T17:35:22&#43;08:00</updated>
             <published>2023-03-08T00:00:00&#43;00:00</published>
             
             <summary type="html">安装gitlab-runner 1 2 3 4 5 6 7 8 9 10 11 12 13 14 # 下载 :如果下载太慢可以在……</summary>
@@ -81,6 +173,7 @@
 &lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;15
 &lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;16
 &lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;17
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;18
 &lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;
 &lt;td class=&#34;lntd&#34;&gt;
 &lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code class=&#34;language-shell&#34; data-lang=&#34;shell&#34;&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;&lt;span class=&#34;c1&#34;&gt;# 注册 runner&lt;/span&gt;
@@ -95,7 +188,8 @@
 &lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;&lt;span class=&#34;c1&#34;&gt;# runner 描述，随便填&lt;/span&gt;
 &lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;XX项目部署
 &lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;
-&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;&lt;span class=&#34;c1&#34;&gt;# runner tag&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;&lt;span class=&#34;c1&#34;&gt;# runner tag，全局唯一&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;&lt;span class=&#34;c1&#34;&gt;# 在.gitlab-ci.yaml中会需要用到，gitlab根据tag来分配对应的runner服务执行任务&lt;/span&gt;
 &lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;server-cicd
 &lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;
 &lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;&lt;span class=&#34;c1&#34;&gt;# 输入（选择） shell&lt;/span&gt;
@@ -157,7 +251,7 @@
 &lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;&lt;span class=&#34;w&#34;&gt;&lt;/span&gt;&lt;span class=&#34;nt&#34;&gt;build-inv&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;:&lt;/span&gt;&lt;span class=&#34;w&#34;&gt;
 &lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;&lt;span class=&#34;w&#34;&gt;  &lt;/span&gt;&lt;span class=&#34;nt&#34;&gt;stage&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;:&lt;/span&gt;&lt;span class=&#34;w&#34;&gt; &lt;/span&gt;&lt;span class=&#34;l&#34;&gt;build&lt;/span&gt;&lt;span class=&#34;w&#34;&gt;
 &lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;&lt;span class=&#34;w&#34;&gt;  &lt;/span&gt;&lt;span class=&#34;nt&#34;&gt;tags&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;:&lt;/span&gt;&lt;span class=&#34;w&#34;&gt;
-&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;&lt;span class=&#34;w&#34;&gt;    &lt;/span&gt;- &lt;span class=&#34;l&#34;&gt;dashang-pc-server&lt;/span&gt;&lt;span class=&#34;w&#34;&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;&lt;span class=&#34;w&#34;&gt;    &lt;/span&gt;- &lt;span class=&#34;l&#34;&gt;server-cicd&lt;/span&gt;&lt;span class=&#34;w&#34;&gt;
 &lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;&lt;span class=&#34;w&#34;&gt;  &lt;/span&gt;&lt;span class=&#34;nt&#34;&gt;rules&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;:&lt;/span&gt;&lt;span class=&#34;w&#34;&gt;
 &lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;&lt;span class=&#34;w&#34;&gt;    &lt;/span&gt;- &lt;span class=&#34;nt&#34;&gt;if&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;:&lt;/span&gt;&lt;span class=&#34;w&#34;&gt; &lt;/span&gt;&lt;span class=&#34;s1&#34;&gt;&amp;#39;$CI_COMMIT_REF_NAME == &amp;#34;master&amp;#34;&amp;#39;&lt;/span&gt;&lt;span class=&#34;w&#34;&gt;
 &lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;&lt;span class=&#34;w&#34;&gt;      &lt;/span&gt;&lt;span class=&#34;nt&#34;&gt;changes&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;:&lt;/span&gt;&lt;span class=&#34;w&#34;&gt;
@@ -179,7 +273,7 @@
 &lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;&lt;span class=&#34;w&#34;&gt;&lt;/span&gt;&lt;span class=&#34;nt&#34;&gt;deploy-inv&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;:&lt;/span&gt;&lt;span class=&#34;w&#34;&gt;
 &lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;&lt;span class=&#34;w&#34;&gt;  &lt;/span&gt;&lt;span class=&#34;nt&#34;&gt;stage&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;:&lt;/span&gt;&lt;span class=&#34;w&#34;&gt; &lt;/span&gt;&lt;span class=&#34;l&#34;&gt;deploy&lt;/span&gt;&lt;span class=&#34;w&#34;&gt;
 &lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;&lt;span class=&#34;w&#34;&gt;  &lt;/span&gt;&lt;span class=&#34;nt&#34;&gt;tags&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;:&lt;/span&gt;&lt;span class=&#34;w&#34;&gt;
-&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;&lt;span class=&#34;w&#34;&gt;    &lt;/span&gt;- &lt;span class=&#34;l&#34;&gt;dashang-pc-server&lt;/span&gt;&lt;span class=&#34;w&#34;&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;&lt;span class=&#34;w&#34;&gt;    &lt;/span&gt;- &lt;span class=&#34;l&#34;&gt;server-cicd&lt;/span&gt;&lt;span class=&#34;w&#34;&gt;
 &lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;&lt;span class=&#34;w&#34;&gt;  &lt;/span&gt;&lt;span class=&#34;nt&#34;&gt;rules&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;:&lt;/span&gt;&lt;span class=&#34;w&#34;&gt;
 &lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;&lt;span class=&#34;w&#34;&gt;    &lt;/span&gt;- &lt;span class=&#34;nt&#34;&gt;if&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;:&lt;/span&gt;&lt;span class=&#34;w&#34;&gt; &lt;/span&gt;&lt;span class=&#34;s1&#34;&gt;&amp;#39;$CI_COMMIT_REF_NAME == &amp;#34;master&amp;#34;&amp;#39;&lt;/span&gt;&lt;span class=&#34;w&#34;&gt;
 &lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;&lt;span class=&#34;w&#34;&gt;      &lt;/span&gt;&lt;span class=&#34;nt&#34;&gt;changes&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;:&lt;/span&gt;&lt;span class=&#34;w&#34;&gt;
@@ -223,7 +317,7 @@
             <title type="text">Fizz Buzz</title>
             <link rel="alternate" type="text/html" href="https://huangl.top/posts/23022820/" />
             <id>https://huangl.top/posts/23022820/</id>
-            <updated>2023-02-28T21:02:47&#43;08:00</updated>
+            <updated>2023-02-28T14:29:08&#43;08:00</updated>
             <published>2023-02-28T00:00:00&#43;00:00</published>
             
             <summary type="html">场景需求： 给你一个整数 n ，找出从 1 到 n 各个整数的 Fizz Buzz 表示，并用字符串数组 answer……</summary>
@@ -370,9 +464,9 @@ answer[i] == i （以字符串形式）如果上述条件全不满足。&lt;/p&g
     
         <entry>
             <title type="text">最富有客户的资产总量</title>
-            <link rel="alternate" type="text/html" href="https://huangl.top/posts/23022320-/" />
-            <id>https://huangl.top/posts/23022320-/</id>
-            <updated>2023-02-23T20:39:40&#43;08:00</updated>
+            <link rel="alternate" type="text/html" href="https://huangl.top/posts/23022320/" />
+            <id>https://huangl.top/posts/23022320/</id>
+            <updated>2023-02-23T20:38:17&#43;08:00</updated>
             <published>2023-02-23T00:00:00&#43;00:00</published>
             
             <summary type="html">场景需求： 给你一个 m x n 的整数网格 accounts ，其中 accounts[i][j] 是第 i​​​​​​​​​​​​ 位客户在第……</summary>
@@ -468,7 +562,7 @@ answer[i] == i （以字符串形式）如果上述条件全不满足。&lt;/p&g
             <title type="text">将数字变成 0 的操作次数</title>
             <link rel="alternate" type="text/html" href="https://huangl.top/posts/23022220/" />
             <id>https://huangl.top/posts/23022220/</id>
-            <updated>2023-02-22T20:51:13&#43;08:00</updated>
+            <updated>2023-02-22T20:50:28&#43;08:00</updated>
             <published>2023-02-22T00:00:00&#43;00:00</published>
             
             <summary type="html">场景需求： 给你一个非负整数 num ，请你返回将它变成 0 所需要的步数。 如果当前数字是偶数，你……</summary>
@@ -598,7 +692,7 @@ answer[i] == i （以字符串形式）如果上述条件全不满足。&lt;/p&g
             <title type="text">一堆数组的动态和</title>
             <link rel="alternate" type="text/html" href="https://huangl.top/posts/23022120/" />
             <id>https://huangl.top/posts/23022120/</id>
-            <updated>2023-02-22T20:51:13&#43;08:00</updated>
+            <updated>2023-02-22T11:07:14&#43;08:00</updated>
             <published>2023-02-21T00:00:00&#43;00:00</published>
             
             <summary type="html">场景需求： 给你一个数组 nums 。 数组「动态和」的计算公式为：runningSum[i] = s……</summary>
@@ -710,7 +804,7 @@ answer[i] == i （以字符串形式）如果上述条件全不满足。&lt;/p&g
             <title type="text">博客的更新迭代</title>
             <link rel="alternate" type="text/html" href="https://huangl.top/posts/first/" />
             <id>https://huangl.top/posts/first/</id>
-            <updated>2023-01-31T19:39:38&#43;08:00</updated>
+            <updated>2023-02-21T20:39:40&#43;08:00</updated>
             <published>2023-01-31T15:31:24&#43;08:00</published>
             
             <summary type="html">2017年自己使用TP5开发了一套博客程序，一直运行至..2023..年，由于框架迭……</summary>
