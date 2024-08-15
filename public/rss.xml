@@ -23,10 +23,345 @@
         
             <copyright>[CC BY-NC-SA 4.0](https://creativecommons.org/licenses/by-nc-sa/4.0/deed.zh)</copyright>
         
-        <lastBuildDate>Wed, 07 Aug 2024 19:56:56 &#43;0800</lastBuildDate>
+        <lastBuildDate>Thu, 15 Aug 2024 20:09:25 &#43;0800</lastBuildDate>
         
             <atom:link rel="self" type="application/rss&#43;xml" href="https://huangl.top/rss.xml" />
         
+        
+            <item>
+                <title>分布式链路追踪 OpenTelemetry与Jaeger</title>
+                <link>https://huangl.top/posts/24080701/</link>
+                <guid isPermaLink="true">https://huangl.top/posts/24080701/</guid>
+                <pubDate>Wed, 07 Aug 2024 19:59:05 &#43;0800</pubDate>
+                
+                
+                
+                    <description>&lt;h2 id=&#34;引言&#34;&gt;引言&lt;/h2&gt;
+&lt;p&gt;随着微服务架构的流行，服务之间的调用变得越来越复杂，如何追踪服务之间的调用链路成为了一个重要的问题。分布式链路追踪技术应运而生，它可以帮助开发者监控服务之间的调用链路，定位和解决请求在服务间流转时的问题。本文将介绍分布式链路追踪的发展历程，以及如何在Go-Kratos框架中集成OpenTelemetry和Jaeger实现链路追踪。&lt;/p&gt;
+&lt;h2 id=&#34;一分布式链路追踪发展简介&#34;&gt;一、分布式链路追踪发展简介&lt;/h2&gt;
+&lt;h3 id=&#34;11-分布式链路追踪介绍&#34;&gt;1.1 分布式链路追踪介绍&lt;/h3&gt;
+&lt;p&gt;分布式链路追踪技术是随着微服务架构的流行而发展起来的，它用于监控服务间的调用链路，帮助开发者定位和监控请求在服务间流转时的问题。OpenTelemetry作为该领域的集大成者，它整合了 OpenTracing 和 OpenCensus，为开发者提供了统一的追踪标准和SDK。&lt;/p&gt;
+&lt;h3 id=&#34;12-opentracing统一的追踪标准&#34;&gt;1.2 OpenTracing：统一的追踪标准&lt;/h3&gt;
+&lt;p&gt;OpenTracing 制定了一套与平台无关、厂商无关的协议标准，使得开发人员能够方便的添加或更换底层APM的实现。&lt;/p&gt;
+&lt;p&gt;它是 CNCF 的项目。OpenTracing 协议的产品有 Jaeger、Zipkin 等等。&lt;/p&gt;
+&lt;h4 id=&#34;opentracing-数据模型&#34;&gt;OpenTracing 数据模型&lt;/h4&gt;
+&lt;p&gt;Trace(s):
+Trace(s) 在 OpenTracing 中是被 spans 隐式定义的。一个 trace 可以被认为是由一个或多个 span 组成的有向无环图。&lt;/p&gt;
+&lt;p&gt;比如，下图示例就表示一个 trace 由 8 个 span 组成，也就是一次链路追踪由 8 个 span 组成：&lt;/p&gt;
+&lt;p&gt;单个 trace(链路) 中 span 之间的关系&lt;/p&gt;
+&lt;pre tabindex=&#34;0&#34;&gt;&lt;code&gt;        [Span A]  ←←←(the root span)
+            |
+     +------+------+
+     |             |
+ [Span B]      [Span C] ←←←(Span C is a `ChildOf` Span A)
+     |             |
+ [Span D]      +---+-------+
+               |           |
+           [Span E]    [Span F] &amp;gt;&amp;gt;&amp;gt; [Span G] &amp;gt;&amp;gt;&amp;gt; [Span H]
+                                       ↑
+                                       ↑
+                                       ↑
+                         (Span G `FollowsFrom` Span F)
+&lt;/code&gt;&lt;/pre&gt;&lt;p&gt;用时间轴来可视化这次链路追踪图，更容易理解：&lt;/p&gt;
+&lt;pre tabindex=&#34;0&#34;&gt;&lt;code&gt;Temporal relationships between Spans in a single Trace
+
+
+––|–––––––|–––––––|–––––––|–––––––|–––––––|–––––––|–––––––|–&amp;gt; time
+
+ [Span A···················································]
+   [Span B··············································]
+      [Span D··········································]
+    [Span C········································]
+         [Span E·······]        [Span F··] [Span G··] [Span H··]
+（来自：https://opentracing.io/specification/）
+&lt;/code&gt;&lt;/pre&gt;&lt;p&gt;Span 是一次链路追踪里的基本组成元素，一个 Span 表示一个独立工作单元，比如一次 http 请求，一次函数调用等。&lt;/p&gt;
+&lt;p&gt;每个 span 里元素：&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;An operation name，服务/操作名称&lt;/li&gt;
+&lt;li&gt;A start timestamp，开始时间&lt;/li&gt;
+&lt;li&gt;A finish timestamp，结束时间&lt;/li&gt;
+&lt;li&gt;Span Tags，一组键值对构成的 Span 标签集合。键值对中，键必须为 string，值可以是字符串，布尔，或者数字类型&lt;/li&gt;
+&lt;li&gt;Span Logs，一组 span 的日志集合。每次 log 操作包含一个键值对，以及一个时间戳&lt;/li&gt;
+&lt;li&gt;References，对 0 或 更多个相关 span 的引用（通过 SpanContext 来引用），多个 span 中的对应关系。&lt;/li&gt;
+&lt;li&gt;SpanContext，携带跨进程(跨服务)通信的数据，比如 span_id, trace_id。&lt;/li&gt;
+&lt;li&gt;Baggage Items，为整条追踪链路保存跨进程(跨服务)的数据，数据形式是 key:value&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;OpenTracing 目前定义了 2 种关系：ChildOf 和 FollowsFrom：&lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;ChildOf&lt;/strong&gt;，一个子 span 可能是父 span 的 ChildOf&lt;/p&gt;
+&lt;pre tabindex=&#34;0&#34;&gt;&lt;code&gt;    [-Parent Span---------]
+         [-Child Span----]
+
+    [-Parent Span--------------]
+         [-Child Span A----]
+          [-Child Span B----]
+        [-Child Span C----]
+         [-Child Span D---------------]
+         [-Child Span E----]
+&lt;/code&gt;&lt;/pre&gt;&lt;p&gt;&lt;strong&gt;FollowsFrom&lt;/strong&gt;，一些父 span 不依赖任何的子 span&lt;/p&gt;
+&lt;pre tabindex=&#34;0&#34;&gt;&lt;code&gt;    [-Parent Span-]  [-Child Span-]
+
+
+    [-Parent Span--]
+     [-Child Span-]
+
+
+    [-Parent Span-]
+                [-Child Span-]
+&lt;/code&gt;&lt;/pre&gt;&lt;p&gt;（来自：https://opentracing.io/specification/）&lt;/p&gt;
+&lt;h4 id=&#34;13-opencensusgoogle背书的追踪项目&#34;&gt;1.3 OpenCensus：Google背书的追踪项目&lt;/h4&gt;
+&lt;p&gt;OpenCensus由Google开发，旨在统一Go语言的Metrics采集和链路跟踪。随着项目的不断演进，它也开始涉足分布式追踪领域，与OpenTracing形成互补。&lt;/p&gt;
+&lt;p&gt;其实，刚开始它并不是要抢 OpenTracing 的饭碗，它只是为了把 Go 语言的 Metrics 采集、链路跟踪与 Go 语言自带的，profile 工具打通，统一用户的使用方式。但是随着项目发展，它也想把链路相关的统一一下。它不仅要做 Metrics 基础指标监控，还要做 OpenTracing 的老本行：分布式跟踪。&lt;/p&gt;
+&lt;h4 id=&#34;14-opentelemetry追踪技术的集大成者&#34;&gt;1.4 OpenTelemetry：追踪技术的集大成者&lt;/h4&gt;
+&lt;p&gt;OpenTelemetry的诞生标志着OpenTracing和OpenCensus的完美结合。它不仅统一了追踪标准，还进一步拓展了Metrics和Logging的融合，为开发者提供了全面的监控解决方案。&lt;/p&gt;
+&lt;p&gt;OpenTelemetry 的核心工作目前主要集中在 3 个部分：&lt;/p&gt;
+&lt;p&gt;规范的制定和协议的统一，规范包含数据传输、API 的规范，协议的统一包含：HTTP W3C 的标准支持及GRPC等框架的协议标准
+多语言 SDK 的实现和集成，用户可以使用 SDK 进行代码自动注入和手动埋点，同时对其他三方库（Log4j、LogBack等）进行集成支持；
+数据收集系统的实现，当前是基于 OpenCensus Service 的收集系统，包括 Agent 和 Collector。
+(来自： &lt;a href=&#34;https://github.com/open-telemetry/docs-cn&#34;&gt;https://github.com/open-telemetry/docs-cn&lt;/a&gt;)&lt;/p&gt;
+&lt;p&gt;OpenTelemetry 的最终形态就是实现 Metrics、Tracing、Logging 的融合。&lt;/p&gt;
+&lt;p&gt;Tracing API 中几个重要概念：&lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;TracerProvider&lt;/strong&gt;：是 API 的入口点，提供了对 tracer 的访问。在代码里主要是创建一个 Tracer，一般是第三方分布式链路管理软件提供具体实现。默认是一个空的 TracerProvider(&amp;quot;&amp;quot;)，虽然也创建 Tracer，但是内部不会执行数据流传输逻辑。&lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;Tracer&lt;/strong&gt;：负责创建 span，一个 tracer 表示一次完整的追踪链路。tracer 由一个或多个 span 组成。跟上面的 OpenTracing 数据模型很像，所以说是两者合并。&lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;Span&lt;/strong&gt;：一次链路追踪操作里的基本操作元素。比如一次函数调用，一次 http 请求。
+里面还有很多详细介绍：https://opentelemetry.io/docs/reference/specification/trace/api/&lt;/p&gt;
+&lt;h4 id=&#34;一条链路追踪信息&#34;&gt;一条链路追踪信息：&lt;/h4&gt;
+&lt;p&gt;有一条链路 trace，它是由一个或多个 span 组成， span 里会记录各种链路中的信息，跨进程的信息，各种 span 之间的关系。&lt;/p&gt;
+&lt;p&gt;使用哪种链路管理软件，则由 traceprovider 来设置。可以是 Jaeger，Pinpoint，Zipkin，Skywalking 等等。&lt;/p&gt;
+&lt;p&gt;span 中的信息收集到链路管理软件，然后可以用图来展示记录的链路信息和链路之间的关系。&lt;/p&gt;
+&lt;h2 id=&#34;二jaeger-分布式链路追踪的佼佼者&#34;&gt;二、jaeger： 分布式链路追踪的佼佼者&lt;/h2&gt;
+&lt;p&gt;Jaeger 是受到 Dapper 和 OpenZipkin 启发，是 Uber 开发的一款分布式链路追踪系统。
+它不仅提供了强大的追踪能力，还拥有直观的用户界面，使得微服务的监控变得简单而高效，用于监控微服务和排查微服务中出现的故障。&lt;/p&gt;
+&lt;p&gt;jaeger 安装：&lt;/p&gt;
+&lt;pre tabindex=&#34;0&#34;&gt;&lt;code&gt;docker run -d --name jaeger \
+  -p 6831:6831/udp \
+  -p 6832:6832/udp \
+  -p 5778:5778 \
+  -p 16686:16686 \
+  -p 4317:4317 \
+  -p 4318:4318 \
+  -p 14250:14250 \
+  -p 14268:14268 \
+  -p 14269:14269 \
+  -p 9411:9411 \
+  jaegertracing/all-in-one:1.59
+&lt;/code&gt;&lt;/pre&gt;&lt;h2 id=&#34;三go-kratos-中应用链路追踪&#34;&gt;三、Go-kratos 中应用链路追踪&lt;/h2&gt;
+&lt;p&gt;在Go-Kratos框架中，集成OpenTelemetry和Jaeger可以显著提升服务的监控能力。通过在服务端配置TraceProvider，并在GRPC和HTTP服务器中加入链路追踪中间件，可以确保服务调用的每一个环节都被有效追踪。&lt;/p&gt;
+&lt;p&gt;当前版本环境&lt;/p&gt;
+&lt;blockquote&gt;
+&lt;p&gt;Go 1.21.&lt;/p&gt;
+&lt;p&gt;Kratos v2.7.3&lt;/p&gt;
+&lt;p&gt;Jaeger v1.11.2&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;p&gt;第一步，设置 TraceProvider()&lt;/p&gt;
+&lt;pre tabindex=&#34;0&#34;&gt;&lt;code&gt;// get trace provider
+func tracerProvider(url string) (*tracesdk.TracerProvider, error) {
+	// create the jaeger exporter
+	exp, err := jaeger.New(jaeger.WithCollectorEndpoint(jaeger.WithEndpoint(url)))
+	if err != nil {
+		return nil, err
+	}
+
+	// New trace provider
+	tp := tracesdk.NewTracerProvider(
+		tracesdk.WithSampler(tracesdk.AlwaysSample()),
+		// always be sure to batch in production
+		tracesdk.WithBatcher(exp),
+		// Record information about this application in an Resource.
+		tracesdk.WithResource(
+			resource.NewWithAttributes(
+				semconv.SchemaURL,
+				semconv.ServiceNameKey.String(Name), // service name,实例名称
+				attribute.String(&amp;#34;env&amp;#34;, Env),        // environment
+				attribute.String(&amp;#34;ID&amp;#34;, Version),     // version
+			)),
+	)
+	return tp, nil
+}
+&lt;/code&gt;&lt;/pre&gt;&lt;p&gt;第二步，给grpc server添加链路追踪中间件（http server一样）&lt;/p&gt;
+&lt;pre tabindex=&#34;0&#34;&gt;&lt;code&gt;url := &amp;#34;http://jaeger:14268/api/traces&amp;#34;
+if os.Getenv(&amp;#34;jaeger_url&amp;#34;) != &amp;#34;&amp;#34; {
+    url = os.Getenv(&amp;#34;jeager_url&amp;#34;)
+}
+
+tp, err := tracerProvider(url) // tracer provider
+if err != nil {
+    log.Error(err)
+}
+
+s := &amp;amp;server{}
+
+// grpc server
+grpcSrv := grpc.NewServer(
+    grpc.Address(&amp;#34;:9000&amp;#34;),
+    grpc.Middleware(
+        middleware.Chain(
+            recovery.Recovery(),
+            tracing.Server(tracing.WithTracerProvider(tp)), //设置trace，传入 trace provider
+            logging.Server(logger),
+        ),
+    ),
+)
+&lt;/code&gt;&lt;/pre&gt;&lt;p&gt;实用封装函数, 用于创建新的context, 并将span传递到新的context中&lt;/p&gt;
+&lt;pre tabindex=&#34;0&#34;&gt;&lt;code&gt;// NewContextWithTraceID 从原 context 中提取 Span，并将其设置到新 context 中
+func NewContextWithTraceID(ctx context.Context, traceName string) (context.Context, Span) {
+	// 从全局 TracerProvider 中获取 Tracer
+	tracer := otel.GetTracerProvider().Tracer(&amp;#34;goroutine&amp;#34;)
+	// 从旧上下文中提取 Span Context
+	oldSpanCtx := trace.SpanContextFromContext(ctx)
+	newCtx := trace.ContextWithSpanContext(context.Background(), oldSpanCtx)
+	// 使用 tracer 开始一个新的 Span
+	newCtx, span := tracer.Start(newCtx, traceName, trace.WithSpanKind(trace.SpanKindInternal))
+	return newCtx, wrapSpan(span, nil)
+}
+
+// 使用实例
+newCtx, span := xtrace.NewContextWithTraceID(ctx, &amp;#34;异步更新饰品磨损信息&amp;#34;)
+go func(newCtx context.Context, span xtrace.Span) {
+	defer span.End()
+	// do something
+}(newCtx, span)
+&lt;/code&gt;&lt;/pre&gt;&lt;p&gt;五、参考&lt;/p&gt;
+&lt;p&gt;&lt;a href=&#34;https://go-kratos.dev/docs/component/middleware/tracing/&#34;&gt;https://go-kratos.dev/docs/component/middleware/tracing/&lt;/a&gt; 链路追踪&lt;/p&gt;
+&lt;p&gt;&lt;a href=&#34;https://go-kratos.dev/blog/go-kratos-opentelemetry-practice/&#34;&gt;https://go-kratos.dev/blog/go-kratos-opentelemetry-practice/&lt;/a&gt; 基于OpenTelemetry的链路追踪&lt;/p&gt;
+&lt;p&gt;&lt;a href=&#34;https://opentracing.io/specification/&#34;&gt;https://opentracing.io/specification/&lt;/a&gt; opentracing doc&lt;/p&gt;
+&lt;p&gt;&lt;a href=&#34;https://opentelemetry.io/docs/instrumentation&#34;&gt;https://opentelemetry.io/docs/instrumentation&lt;/a&gt; opentelemetry doc&lt;/p&gt;
+&lt;p&gt;&lt;a href=&#34;https://opentelemetry.io/docs&#34;&gt;https://opentelemetry.io/docs&lt;/a&gt; opentelemetry trace api&lt;/p&gt;
+&lt;p&gt;&lt;a href=&#34;https://opencensus.io/&#34;&gt;https://opencensus.io/&lt;/a&gt; opencensus 官网&lt;/p&gt;
+&lt;p&gt;&lt;a href=&#34;https://www.jaegertracing.io/docs/1.35/&#34;&gt;https://www.jaegertracing.io/docs/1.35/&lt;/a&gt; jaeger doc&lt;/p&gt;
+&lt;p&gt;&lt;a href=&#34;https://www.cnblogs.com/jiujuan/p/16349519.html&#34;&gt;https://www.cnblogs.com/jiujuan/p/16349519.html&lt;/a&gt;&lt;/p&gt;
+</description>
+                
+                
+                
+                
+                
+                    
+                        
+                            
+                                
+                                
+                                
+                                    <category domain="https://huangl.top/categories/%E5%BC%80%E5%8F%91/">开发</category>
+                                
+                            
+                        
+                    
+                        
+                            
+                                
+                                
+                                
+                                    <category domain="https://huangl.top/tags/golang/">Golang</category>
+                                
+                            
+                                
+                                
+                                
+                                    <category domain="https://huangl.top/tags/%E5%88%86%E5%B8%83%E5%BC%8F/">分布式</category>
+                                
+                            
+                                
+                                
+                                
+                                    <category domain="https://huangl.top/tags/%E9%93%BE%E8%B7%AF%E8%BF%BD%E8%B8%AA/">链路追踪</category>
+                                
+                            
+                                
+                                
+                                
+                                    <category domain="https://huangl.top/tags/jaeger/">Jaeger</category>
+                                
+                            
+                        
+                    
+                
+            </item>
+        
+            <item>
+                <title>kafka手动消费丢消息的解决方案</title>
+                <link>https://huangl.top/posts/24080501/</link>
+                <guid isPermaLink="true">https://huangl.top/posts/24080501/</guid>
+                <pubDate>Mon, 05 Aug 2024 14:03:17 &#43;0800</pubDate>
+                
+                
+                
+                    <description>&lt;h2 id=&#34;引言&#34;&gt;引言&lt;/h2&gt;
+&lt;p&gt;Kafka是一个流行的分布式流处理平台，广泛用于构建实时数据管道和流处理应用程序。在本文中，我们将探讨使用Kafka时遇到的一个常见问题：在使用&lt;code&gt;kafka-go&lt;/code&gt;库手动提交offset时消息丢失的问题，并提供解决方案。&lt;/p&gt;
+&lt;h3 id=&#34;问题描述&#34;&gt;问题描述：&lt;/h3&gt;
+&lt;p&gt;在使用&lt;code&gt;kafka-go&lt;/code&gt;库手动提交offset消费Kafka消息时，如果消费第一条消息后没有立即提交offset，下一次拉取消息时会跳过当前消息获取到下一条消息，如果新消息提交offset了，上一条消息也会被认为提交了，导致消息丢失。&lt;/p&gt;
+&lt;h3 id=&#34;期望结果&#34;&gt;期望结果：&lt;/h3&gt;
+&lt;p&gt;我们期望即使不立即提交offset，消费者也能够在下一次拉取时重复获取同一条消息，直到offset被明确提交。&lt;/p&gt;
+&lt;h3 id=&#34;问题分析&#34;&gt;问题分析：&lt;/h3&gt;
+&lt;p&gt;经过深入分析&lt;code&gt;kafka-go&lt;/code&gt;库的源代码和相关文档，我们发现在&lt;strong&gt;GroupID&lt;/strong&gt;存在的情况下，显式提交offset的处理不会生效，这是因为它涉及到消费组的重平衡机制。&lt;/p&gt;
+&lt;h3 id=&#34;解决方案&#34;&gt;解决方案：&lt;/h3&gt;
+&lt;ol&gt;
+&lt;li&gt;&lt;strong&gt;不使用GroupID&lt;/strong&gt;
+&lt;ul&gt;
+&lt;li&gt;在初始化消费者时，不传入GroupID参数，这样Kafka会认为是以非消费组的方式消费消。&lt;/li&gt;
+&lt;li&gt;每个消费者都是独立的，会消费指定分区的所有消息，不会出现重平衡的问题。&lt;/li&gt;
+&lt;li&gt;这要求开发者自己管理offset，并且可能会影响消息的并发消费和系统的容错性。&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;记录消息的Offset&lt;/strong&gt;
+&lt;ul&gt;
+&lt;li&gt;在消费消息时，记录当前消费的offset。&lt;/li&gt;
+&lt;li&gt;如果业务处理异常未能消费，则通过&lt;strong&gt;SetOffset&lt;/strong&gt;接口将当前Offset重置为该消息的offset（因为kafka-go库的处理是拉取到消息后会将内部维护的offset+1）&lt;/li&gt;
+&lt;li&gt;这样下次拉取消息时，会重新获取该消息；如果消费成功，下一次会获取下一条消息。&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;存档和恢复Offset&lt;/strong&gt;
+&lt;ul&gt;
+&lt;li&gt;每次消费成功时，记录当前消费的offset。&lt;/li&gt;
+&lt;li&gt;如果服务重启，在初始化消费者时，将startOffset设置为存档的offset，这样可以保证服务重启后，可以从存档的offset继续消费，避免重复消费消息。&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/li&gt;
+&lt;/ol&gt;
+&lt;h3 id=&#34;注意事项&#34;&gt;注意事项&lt;/h3&gt;
+&lt;p&gt;不使用GroupID会影响Kafka的并发处理能力和容错性。在决定是否使用GroupID时，需要根据实际业务需求和系统架构仔细权衡。&lt;/p&gt;
+&lt;h3 id=&#34;参考资料&#34;&gt;参考资料：&lt;/h3&gt;
+&lt;p&gt;&lt;a href=&#34;https://github.com/segmentio/kafka-go&#34;&gt;kafka-go Github&lt;/a&gt;&lt;/p&gt;
+&lt;p&gt;&lt;a href=&#34;https://kafka.apache.org/documentation/&#34;&gt;Kafka官方文档&lt;/a&gt;&lt;/p&gt;
+</description>
+                
+                
+                
+                
+                
+                    
+                        
+                            
+                                
+                                
+                                
+                                    <category domain="https://huangl.top/categories/%E5%BC%80%E5%8F%91/">开发</category>
+                                
+                            
+                        
+                    
+                        
+                            
+                                
+                                
+                                
+                                    <category domain="https://huangl.top/tags/golang/">Golang</category>
+                                
+                            
+                                
+                                
+                                
+                                    <category domain="https://huangl.top/tags/kafka/">Kafka</category>
+                                
+                            
+                                
+                                
+                                
+                                    <category domain="https://huangl.top/tags/%E6%B6%88%E6%81%AF%E9%98%9F%E5%88%97/">消息队列</category>
+                                
+                            
+                        
+                    
+                
+            </item>
         
             <item>
                 <title>Protobuf版本兼容性问题解决方案</title>
@@ -924,9 +1259,9 @@ answer[i] == i （以字符串形式）如果上述条件全不满足。&lt;/p&g
                 
                 
                 
-                    <description>&lt;p&gt;&lt;b&gt;2017&lt;/b&gt;年自己使用&lt;b&gt;TP5&lt;/b&gt;开发了一套博客程序，一直运行至..2023..年，由于框架迭代问题以及本人懒惰一直没维护升级导致有很多漏洞，经常被攻击，于是在&lt;b&gt;2023&lt;/b&gt;年正式废弃，启用新的基于&lt;b&gt;Hugo&lt;/b&gt;二开的博客程序，历史文章会选择性的迁移部分到新系统中。&lt;/p&gt;
+                    <description>&lt;p&gt;&lt;b&gt;2017&lt;/b&gt;年自己使用&lt;b&gt;TP5&lt;/b&gt;开发了一套博客程序，一直运行至..2023..年，由于框架迭代问题以及本人懒惰一直没维护升级导致有很多漏洞，经常被攻击，于是在&lt;b&gt;2023&lt;/b&gt;年正式废弃，启用新的基于&lt;b&gt;Hugo&lt;/b&gt;二开的博客程序，正好和过去道个别，历史文章就不再迁移，从头开始记录。&lt;/p&gt;
 &lt;hr&gt;
-&lt;p&gt;一直想要再重新手撸一套博客程序，但是由于各种各样的事情最终还是没有实施，最后选择偷懒用现成的Hugo😄&lt;/p&gt;
+&lt;p&gt;一直想要再重新手撸一套博客程序，但是由于各种各样的事情最终还是没有实施，最后放弃治疗选择偷懒用Hugo😄&lt;/p&gt;
 </description>
                 
                 
