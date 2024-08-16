@@ -4,7 +4,7 @@
 <feed xmlns="http://www.w3.org/2005/Atom" xml:lang="zh-CN">
     <title type="text">三石兄博客</title>
     <subtitle type="html">三石兄博客，记录个人的生活与工作。</subtitle>
-    <updated>2024-08-15T20:09:25&#43;08:00</updated>
+    <updated>2024-08-16T10:42:40&#43;08:00</updated>
     <id>https://huangl.top/</id>
     <link rel="alternate" type="text/html" href="https://huangl.top/" />
     <link rel="self" type="application/atom&#43;xml" href="https://huangl.top/atom.xml" />
@@ -20,7 +20,7 @@
             <title type="text">分布式链路追踪 OpenTelemetry与Jaeger</title>
             <link rel="alternate" type="text/html" href="https://huangl.top/posts/24080701/" />
             <id>https://huangl.top/posts/24080701/</id>
-            <updated>2024-08-15T19:58:12&#43;08:00</updated>
+            <updated>2024-08-15T20:10:43&#43;08:00</updated>
             <published>2024-08-07T19:59:05&#43;08:00</published>
             
             <summary type="html">引言 随着微服务架构的流行，服务之间的调用变得越来越复杂，如何追踪服务之间的调用链路成……</summary>
@@ -111,8 +111,8 @@ Trace(s) 在 OpenTracing 中是被 spans 隐式定义的。一个 trace 可以�
 &lt;p&gt;Tracing API 中几个重要概念：&lt;/p&gt;
 &lt;p&gt;&lt;strong&gt;TracerProvider&lt;/strong&gt;：是 API 的入口点，提供了对 tracer 的访问。在代码里主要是创建一个 Tracer，一般是第三方分布式链路管理软件提供具体实现。默认是一个空的 TracerProvider(&amp;quot;&amp;quot;)，虽然也创建 Tracer，但是内部不会执行数据流传输逻辑。&lt;/p&gt;
 &lt;p&gt;&lt;strong&gt;Tracer&lt;/strong&gt;：负责创建 span，一个 tracer 表示一次完整的追踪链路。tracer 由一个或多个 span 组成。跟上面的 OpenTracing 数据模型很像，所以说是两者合并。&lt;/p&gt;
-&lt;p&gt;&lt;strong&gt;Span&lt;/strong&gt;：一次链路追踪操作里的基本操作元素。比如一次函数调用，一次 http 请求。
-里面还有很多详细介绍：https://opentelemetry.io/docs/reference/specification/trace/api/&lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;Span&lt;/strong&gt;：一次链路追踪操作里的基本操作元素。比如一次函数调用，一次 http 请求。&lt;/p&gt;
+&lt;p&gt;里面还有很多详细介绍：https://opentelemetry.io/docs/reference/specification/trace/api/&lt;/p&gt;
 &lt;h4 id=&#34;一条链路追踪信息&#34;&gt;一条链路追踪信息：&lt;/h4&gt;
 &lt;p&gt;有一条链路 trace，它是由一个或多个 span 组成， span 里会记录各种链路中的信息，跨进程的信息，各种 span 之间的关系。&lt;/p&gt;
 &lt;p&gt;使用哪种链路管理软件，则由 traceprovider 来设置。可以是 Jaeger，Pinpoint，Zipkin，Skywalking 等等。&lt;/p&gt;
@@ -1252,12 +1252,12 @@ answer[i] == i （以字符串形式）如果上述条件全不满足。&lt;/p&g
             <title type="text">博客的更新迭代</title>
             <link rel="alternate" type="text/html" href="https://huangl.top/posts/first/" />
             <id>https://huangl.top/posts/first/</id>
-            <updated>2024-08-15T19:31:44&#43;08:00</updated>
+            <updated>2024-08-16T10:42:27&#43;08:00</updated>
             <published>2023-01-31T15:31:24&#43;08:00</published>
             
             <summary type="html">2017年自己使用TP5开发了一套博客程序，一直运行至..2023..年，由于框架迭……</summary>
             
-                <content type="html">&lt;p&gt;&lt;b&gt;2017&lt;/b&gt;年自己使用&lt;b&gt;TP5&lt;/b&gt;开发了一套博客程序，一直运行至..2023..年，由于框架迭代问题以及本人懒惰一直没维护升级导致有很多漏洞，经常被攻击，于是在&lt;b&gt;2023&lt;/b&gt;年正式废弃，启用新的基于&lt;b&gt;Hugo&lt;/b&gt;二开的博客程序，正好和过去道个别，历史文章就不再迁移，从头开始记录。&lt;/p&gt;
+                <content type="html">&lt;p&gt;&lt;b&gt;2017&lt;/b&gt;年自己使用&lt;b&gt;TP5&lt;/b&gt;开发了一套博客程序，一直运行至..2023..年，由于框架迭代问题以及本人懒惰一直没维护升级导致有很多漏洞，经常被攻击，于是在&lt;b&gt;2023&lt;/b&gt;年正式废弃，启用新的基于&lt;b&gt;Hugo&lt;/b&gt;的博客程序，正好和过去道个别，历史文章就不再迁移，从头开始记录。&lt;/p&gt;
 &lt;hr&gt;
 &lt;p&gt;一直想要再重新手撸一套博客程序，但是由于各种各样的事情最终还是没有实施，最后放弃治疗选择偷懒用Hugo😄&lt;/p&gt;
 </content>
