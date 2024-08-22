@@ -23,7 +23,7 @@
         
             <copyright>[CC BY-NC-SA 4.0](https://creativecommons.org/licenses/by-nc-sa/4.0/deed.zh)</copyright>
         
-        <lastBuildDate>Wed, 21 Aug 2024 20:13:04 &#43;0800</lastBuildDate>
+        <lastBuildDate>Thu, 22 Aug 2024 20:03:04 &#43;0800</lastBuildDate>
         
             <atom:link rel="self" type="application/rss&#43;xml" href="https://huangl.top/rss.xml" />
         
@@ -36,8 +36,7 @@
                 
                 
                 
-                    <description>&lt;h3 id=&#34;分析-kratos-的-熔断器实现&#34;&gt;分析 Kratos 的 熔断器实现&lt;/h3&gt;
-&lt;h3 id=&#34;前言&#34;&gt;前言&lt;/h3&gt;
+                    <description>&lt;h3 id=&#34;引言&#34;&gt;引言&lt;/h3&gt;
 &lt;p&gt;熔断器是为了当依赖的服务已经出现故障时，主动阻止对依赖服务的请求。保证自身服务的正常运行不受依赖服务影响，防止雪崩效应。&lt;/p&gt;
 &lt;h3 id=&#34;为什么需要熔断器&#34;&gt;为什么需要熔断器&lt;/h3&gt;
 &lt;ol&gt;
@@ -52,20 +51,7 @@
 &lt;li&gt;打开状态（OPEN）：熔断器打开时，请求会被熔断器拒绝，直接返回错误，熔断器会统计一段时间内的请求成功率，如果请求成功率高于设定的阈值，熔断器会进入半开状态。&lt;/li&gt;
 &lt;li&gt;半开状态（HALF-OPEN）：熔断器半开时，熔断器会允许部分请求通过，熔断器会统计一段时间内的请求成功率，如果请求成功率高于设定的阈值，熔断器会进入关闭状态，否则会继续保持打开状态。&lt;/li&gt;
 &lt;/ol&gt;
-&lt;h4 id=&#34;google-sre-过载保护算法&#34;&gt;Google SRE 过载保护算法&lt;/h4&gt;
-&lt;p&gt;&lt;img src=&#34;https://s5.51cto.com/oss/202105/24/0771329ba6c445460d9c291b79b8ff2b.png&#34; alt=&#34;alt text&#34;&gt;&lt;/p&gt;
-&lt;p&gt;算法如上所示，这个公式计算的是请求被丢弃的概率[^3]&lt;/p&gt;
-&lt;ul&gt;
-&lt;li&gt;requests: 一段时间的请求数量&lt;/li&gt;
-&lt;li&gt;accepts: 成功的请求数量&lt;/li&gt;
-&lt;li&gt;K: 倍率，K 越小表示越激进，越小表示越容易被丢弃请求&lt;/li&gt;
-&lt;/ul&gt;
-&lt;p&gt;这个算法的好处是不会直接一刀切的丢弃所有请求，而是计算出一个概率来进行判断，当成功的请求数量越少，K越小的时候的值就越大，计算出的概率也就越大，表示这个请求被丢弃的概率越大&lt;/p&gt;
 &lt;h3 id=&#34;kratos-实现分析&#34;&gt;Kratos 实现分析&lt;/h3&gt;
-&lt;h4 id=&#34;源码地址&#34;&gt;源码地址&lt;/h4&gt;
-&lt;ul&gt;
-&lt;li&gt;&lt;a href=&#34;https://github.com/go-kratos/aegis/tree/main/circuitbreaker&#34;&gt;https://github.com/go-kratos/aegis/tree/main/circuitbreaker&lt;/a&gt;&lt;/li&gt;
-&lt;/ul&gt;
 &lt;h4 id=&#34;circuitbreaker-接口&#34;&gt;CircuitBreaker 接口&lt;/h4&gt;
 &lt;div class=&#34;highlight&#34;&gt;&lt;div class=&#34;chroma&#34;&gt;
 &lt;table class=&#34;lntable&#34;&gt;&lt;tr&gt;&lt;td class=&#34;lntd&#34;&gt;
@@ -353,8 +339,7 @@
 &lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;&lt;span class=&#34;c1&#34;&gt;&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;}&lt;/span&gt;
 &lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
 &lt;/div&gt;
-&lt;/div&gt;&lt;p&gt;kratos采用 Google SRE 的实现的好处就是没有半开的状态，也没有完全开启的状态，而是通过一个概率来进行判断我们的流量是否应该通过，这样没有那么死板，也可以保证我们错误率比较高的时候不会大量请求服务端，给服务端喘息恢复的时间。&lt;/p&gt;
-&lt;h3 id=&#34;参考&#34;&gt;参考&lt;/h3&gt;
+&lt;/div&gt;&lt;h3 id=&#34;参考&#34;&gt;参考&lt;/h3&gt;
 &lt;ul&gt;
 &lt;li&gt;Google SRE &lt;a href=&#34;https://sre.google/sre-book/handling-overload/#eq2101&#34;&gt;https://sre.google/sre-book/handling-overload/#eq2101&lt;/a&gt;&lt;/li&gt;
 &lt;li&gt;kratos 实现 &lt;a href=&#34;https://github.com/go-kratos/aegis/tree/main/circuitbreaker&#34;&gt;https://github.com/go-kratos/aegis/tree/main/circuitbreaker&lt;/a&gt;&lt;/li&gt;
@@ -403,22 +388,15 @@
             </item>
         
             <item>
-                <title>Kratos 源码分析：限流器 Limiter</title>
+                <title>Kratos 源码分析：限流器</title>
                 <link>https://huangl.top/posts/24081901/</link>
                 <guid isPermaLink="true">https://huangl.top/posts/24081901/</guid>
                 <pubDate>Mon, 19 Aug 2024 20:11:53 &#43;0800</pubDate>
                 
                 
                 
-                    <description>&lt;h3 id=&#34;分析-kratos-的-bbr-限流器实现&#34;&gt;分析 Kratos 的 BBR 限流器实现&lt;/h3&gt;
-&lt;h3 id=&#34;0x00-前言&#34;&gt;0x00 前言&lt;/h3&gt;
-&lt;p&gt;限流是当服务负载（或 Qps）超过一定量级（Load）时，主动丢弃一部分请求，是保护服务路径核心系统不被拖垮的常用方案。是服务端常用的一种过载保护的手段。有几个知识点：&lt;/p&gt;
-&lt;ul&gt;
-&lt;li&gt;little’s Law：利特尔法则，估算系统的最大吞吐量&lt;/li&gt;
-&lt;li&gt;系统最大吞吐量的计算&lt;/li&gt;
-&lt;li&gt;EWMA：指数加权移动平均法&lt;/li&gt;
-&lt;/ul&gt;
-&lt;h3 id=&#34;0x01-传统限流方法-vs-bbr-限流&#34;&gt;0x01 传统限流方法 VS BBR 限流&lt;/h3&gt;
+                    <description>&lt;h3 id=&#34;引言&#34;&gt;引言&lt;/h3&gt;
+&lt;p&gt;限流是当服务负载（或 Qps）超过一定量级（Load）时，主动丢弃一部分请求，是保护服务路径核心系统不被拖垮的常用方案。是服务端常用的一种过载保护的手段。&lt;/p&gt;
 &lt;h4 id=&#34;系统的最大吞吐量重要&#34;&gt;系统的最大吞吐量（重要）&lt;/h4&gt;
 &lt;p&gt;下面这段文字解释了maxFlight的计算逻辑：什么时候系统的吞吐量就是最大的吞吐量？&lt;/p&gt;
 &lt;ol&gt;
@@ -438,7 +416,7 @@
 &lt;p&gt;而 BBR 限流的思路 和传统方式有很大区别：&lt;/p&gt;
 &lt;p&gt;TCP BBR 拥塞控制算法 的思想给了我们一个很大的启发。我们应该根据系统能够处理的请求，和允许进来的请求，来做平衡，而不是根据一个间接的指标（系统 load）来做限流。最终我们追求的目标是 在系统不被拖垮的情况下，提高系统的吞吐率，而不是 load 一定要到低于某个阈值。如果我们还是按照固有的思维，超过特定的 load 就禁止流量进入，系统 load 恢复就放开流量，这样做的结果是无论我们怎么调参数，调比例，都是按照果来调节因，都无法取得良好的效果。&lt;/p&gt;
 &lt;p&gt;简言之，自适应限流就是根据当前负载情况，来嗅探 load 的值，尽可能提高系统的吞吐量。&lt;/p&gt;
-&lt;h3 id=&#34;0x02-自适应限流算法原理&#34;&gt;0x02 自适应限流算法原理&lt;/h3&gt;
+&lt;h3 id=&#34;自适应限流算法原理&#34;&gt;自适应限流算法原理&lt;/h3&gt;
 &lt;p&gt;本篇引用自 alibaba/Sentinel 项目的文档：&lt;/p&gt;
 &lt;p&gt;Sentinel 系统自适应限流从整体维度对应用入口流量进行控制，结合 应用的 Load、CPU 使用率、总体平均 RT、入口 QPS 和并发线程数 等几个维度的监控指标，通过自适应的流控策略，让系统的入口流量和系统的负载达到一个平衡，让系统尽可能跑在最大吞吐量的同时保证系统整体的稳定性。&lt;/p&gt;
 &lt;h3 id=&#34;背景&#34;&gt;背景&lt;/h3&gt;
@@ -476,11 +454,11 @@
 &lt;/ul&gt;
 &lt;p&gt;然而，和 TCP BBR 的不一样的地方在于，还需要用一个系统负载的值（load1）来激发这套机制启动。&lt;/p&gt;
 &lt;p&gt;注：这种系统自适应算法对于低 load 的请求，它的效果是一个 &amp;quot;兜底&amp;quot; 的角色。对于不是应用本身造成的 load 高的情况（如其它进程导致的不稳定的情况），效果不明显。&lt;/p&gt;
-&lt;h3 id=&#34;0x02-kraots-的限流算法&#34;&gt;0x02 Kraots 的限流算法&lt;/h3&gt;
+&lt;h3 id=&#34;kraots-的限流算法&#34;&gt;Kraots 的限流算法&lt;/h3&gt;
 &lt;p&gt;kratos 借鉴了 Sentinel 项目的自适应限流系统，通过综合分析服务的 cpu 使用率、请求成功的 qps 和请求成功的 rt（请求成功的响应耗时） 来做自适应限流保护。从官方文档上看，限流算法要实现的核心目标有如下两点：&lt;/p&gt;
 &lt;ul&gt;
 &lt;li&gt;自动 嗅探负载和 qps，减少人工配置 &amp;amp;&amp;amp; 干预&lt;/li&gt;
-&lt;li&gt;削顶， 保证超载时系统不被拖垮，并能以高水位 qps 继续运行&lt;/li&gt;
+&lt;li&gt;削顶，保证超载时系统不被拖垮，并能以高水位 qps 继续运行&lt;/li&gt;
 &lt;/ul&gt;
 &lt;p&gt;BBR 限流规则依靠下面 4 个指标共同确定：&lt;/p&gt;
 &lt;table&gt;
@@ -551,8 +529,9 @@
 第一种情况较易理解，第二种情况是在CPU未过负载，为了避免限流/恢复机制导致的CPU毛刺而采用了优化策略，其目的是使CPU的负载达到一个相对稳定的水平&lt;/li&gt;
 &lt;/ol&gt;
 &lt;h4 id=&#34;压测报告&#34;&gt;压测报告&lt;/h4&gt;
-&lt;p&gt;请求以每秒增加 1 个的速度不停上升，压测效果如下：&lt;/p&gt;
-&lt;p&gt;没有限流的场景里，系统在 700qps 时开始抖动，在 1k qps 时被拖垮，几乎没有新的请求能被放行，然而在使用限流之后，系统请求能够稳定在 600 qps 左右，rt 没有暴增，服务也没有被打垮，可见，限流有效的保护了服务。&lt;/p&gt;
+&lt;p&gt;请求以每秒增加 1 个的速度不停上升，压测效果如下：
+&lt;img src=&#34;https://huangl.top/images/24081901-1.png&#34; alt=&#34;images&#34;&gt;
+没有限流的场景里，系统在 700qps 时开始抖动，在 1k qps 时被拖垮，几乎没有新的请求能被放行，然而在使用限流之后，系统请求能够稳定在 600 qps 左右，rt 没有暴增，服务也没有被打垮，可见，限流有效的保护了服务。&lt;/p&gt;
 &lt;h3 id=&#34;参考&#34;&gt;参考&lt;/h3&gt;
 &lt;ul&gt;
 &lt;li&gt;&lt;a href=&#34;https://github.com/go-kratos/kratos/blob/v1.0.x/pkg/ratelimit/limiter.go&#34;&gt;limter.go&lt;/a&gt;&lt;/li&gt;
