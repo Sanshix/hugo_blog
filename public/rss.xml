@@ -7,7 +7,7 @@
 
 <rss xmlns:atom="http://www.w3.org/2005/Atom" version="2.0">
     <channel>
-        <title>三石兄博客</title>
+        <title>三石兄的记录</title>
         <link>https://huangl.top/</link>
         <description>三石兄博客，记录个人的生活与工作。</description>
         <generator>Hugo 0.121.1 https://gohugo.io/</generator>
@@ -23,7 +23,7 @@
         
             <copyright>[CC BY-NC-SA 4.0](https://creativecommons.org/licenses/by-nc-sa/4.0/deed.zh)</copyright>
         
-        <lastBuildDate>Thu, 22 Aug 2024 20:03:04 &#43;0800</lastBuildDate>
+        <lastBuildDate>Tue, 10 Sep 2024 17:11:54 &#43;0800</lastBuildDate>
         
             <atom:link rel="self" type="application/rss&#43;xml" href="https://huangl.top/rss.xml" />
         

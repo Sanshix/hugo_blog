@@ -2,9 +2,9 @@
 
 
 <feed xmlns="http://www.w3.org/2005/Atom" xml:lang="zh-CN">
-    <title type="text">三石兄博客</title>
+    <title type="text">三石兄的记录</title>
     <subtitle type="html">三石兄博客，记录个人的生活与工作。</subtitle>
-    <updated>2024-08-22T20:03:04&#43;08:00</updated>
+    <updated>2024-09-10T17:11:54&#43;08:00</updated>
     <id>https://huangl.top/</id>
     <link rel="alternate" type="text/html" href="https://huangl.top/" />
     <link rel="self" type="application/atom&#43;xml" href="https://huangl.top/atom.xml" />
@@ -20,7 +20,7 @@
             <title type="text">Kratos 源码分析：熔断</title>
             <link rel="alternate" type="text/html" href="https://huangl.top/posts/24082101/" />
             <id>https://huangl.top/posts/24082101/</id>
-            <updated>2024-08-22T11:01:24&#43;08:00</updated>
+            <updated>2024-08-23T11:38:12&#43;08:00</updated>
             <published>2024-08-21T19:35:53&#43;08:00</published>
             
             <summary type="html">引言 熔断器是为了当依赖的服务已经出现故障时，主动阻止对依赖服务的请求。保证自身服务的……</summary>

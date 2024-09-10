@@ -2,7 +2,7 @@
 # 站点配置
 
 baseURL = "https://huangl.top"
-title = "三石兄博客"
+title = "三石兄的记录"
 languageCode = "zh-CN"
 hasCJKLanguage = true
 # 版权信息（支持 Markdown）
