@@ -1,7 +1,7 @@
 ##########################################
 # 站点配置
 
-baseURL = "https://sanshix.github.io/hugo_blog/"
+baseURL = "https://sanshix.github.io/blog/"
 title = "三石兄的记录"
 languageCode = "zh-CN"
 hasCJKLanguage = true

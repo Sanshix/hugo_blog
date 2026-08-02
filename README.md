@@ -1,7 +1,7 @@
-# hugo_blog
+# blog
 使用hugo搭建的个人博客程序
 
-在线访问：https://sanshix.github.io/hugo_blog/
+在线访问：https://sanshix.github.io/blog/
 
 欠缺功能：
 
