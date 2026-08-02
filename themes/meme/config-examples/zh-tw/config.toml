@@ -37,7 +37,8 @@ enableGitInfo = false
 enableRobotsTXT = true
 
 # 每一分頁的文章數（僅對「文章摘要」首頁佈局有效）
-paginate = 5
+[pagination]
+    pagerSize = 5
 
 # URL 相關
 disablePathToLower = false
@@ -94,7 +95,7 @@ uglyURLs = false
     keepWhitespace = false
 
 # 作者資訊
-[author]
+[params.author]
     # 名字
     name = "reuixiy"
     # 郵箱

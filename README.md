@@ -1,6 +1,8 @@
 # hugo_blog
 使用hugo搭建的个人博客程序
 
+在线访问：https://sanshix.github.io/hugo_blog/
+
 欠缺功能：
 
 	1. 友链添加

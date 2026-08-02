@@ -1,7 +1,7 @@
 ##########################################
 # 站点配置
 
-baseURL = "https://huangl.top"
+baseURL = "https://sanshix.github.io/hugo_blog/"
 title = "三石兄的记录"
 languageCode = "zh-CN"
 hasCJKLanguage = true
@@ -37,7 +37,8 @@ enableGitInfo = false
 enableRobotsTXT = true
 
 # 每一分页的文章数（仅对「文章摘要」首页布局有效）
-paginate = 10
+[pagination]
+    pagerSize = 10
 
 # URL 相关
 disablePathToLower = false
@@ -94,7 +95,7 @@ uglyURLs = false
     keepWhitespace = false
 
 # 作者信息
-[author]
+[params.author]
     # 名字
     name = "Sanshi"
     # 邮箱
@@ -336,7 +337,7 @@ uglyURLs = false
     # 站点信息
 
     # 站点的 LOGO
-    siteLogo = "/icons/apple-touch-icon.png"
+    siteLogo = "icons/apple-touch-icon.png"
     # 说明：用于 JSON-LD、Open Graph
 
     # 站点的描述
